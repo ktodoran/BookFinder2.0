@@ -1,21 +1,25 @@
-const express = require('express');
-const path = require('path');
-const db = require('./config/connection');
-const routes = require('./routes');
+const express = require("express");
+const mongoose = require("mongoose");
+const routes = require("./routes");
 
-const app = express();
 const PORT = process.env.PORT || 3001;
+const app = express();
 
+// Define middleware here
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// if we're in production, serve client/build as static assets
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
 }
 
-app.use(routes);
+// Define API routes here
+app.use(routes)
 
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
+// Connect to the Mongo DB
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/googlebooks", { useNewUrlParser: true });
+
+app.listen(PORT, () => {
+  console.log(`🌎 ==> API server now on port ${PORT}!`);
 });
